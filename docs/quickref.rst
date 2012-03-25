@@ -272,6 +272,27 @@ Use::
 
 __ `http://docs.pylonsproject.org/projects/pyramid_jinja2/en/latest/`
 
+
+Form generation
+---------------
+
+- `deform`__, Chameleon templates ---> `online demo`__, `local demo`__
+
+- `deform_mako`__, a Mako port of the Chameleon templates included
+  in Deform
+
+- `deform_jinja2`__, a set of jinja2 templates for deform.
+  Includes standard and uni-form templates
+
+- `colander`__, schema-based validation and deserializing
+
+__ https://github.com/Pylons/deform
+__ http://deformdemo.repoze.org/
+__ https://github.com/Pylons/deformdemo
+__ https://github.com/mcdonc/deform_mako
+__ https://github.com/sontek/deform_jinja2
+__ https://github.com/Pylons/colander
+
 Security
 --------
 For authentication routines, see `Velruse`__
