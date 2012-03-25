@@ -221,7 +221,7 @@ Chameleon
 ~~~~~~~~~
 ::
 
-    @view_config(route_name='home', renderer='templates/mytemplate.pt')
+    @view_config(renderer='templates/mytemplate.pt')
     def my_view(request):
         #
         return {'one':one, 'project':'myproject'}
@@ -288,7 +288,7 @@ Form generation
   in Deform
 
 - `deform_jinja2`__, a set of jinja2 templates for deform.
-  Includes standard and uni-form templates
+  Includes standard and uni-form templates ---> `example`__
 
 - `colander`__, schema-based validation and deserializing
 
@@ -297,6 +297,7 @@ __ http://deformdemo.repoze.org/
 __ https://github.com/Pylons/deformdemo
 __ https://github.com/mcdonc/deform_mako
 __ https://github.com/sontek/deform_jinja2
+__ http://www.getkoru.com/register
 __ https://github.com/Pylons/colander
 
 Security
