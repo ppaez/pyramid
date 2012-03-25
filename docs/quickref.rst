@@ -193,15 +193,6 @@ Also::
         return HTTPFound(location = request.route_url('view_page', pagename='FrontPage'))
 
 
-Use a template
-~~~~~~~~~~~~~~
-::
-
-    @view_config(route_name='home', renderer='templates/mytemplate.pt')
-    def my_view(request):
-        #
-        return {'one':one, 'project':'tutorial'}
-
 Handle a form
 ~~~~~~~~~~~~~
 1. Display the form (the return at the end is used)
@@ -230,6 +221,13 @@ Chameleon
 ~~~~~~~~~
 ::
 
+    @view_config(route_name='home', renderer='templates/mytemplate.pt')
+    def my_view(request):
+        #
+        return {'one':one, 'project':'myproject'}
+
+Direct use::
+
     from pyramid.renderers import render_to_response
 
     def sample_view(request):
@@ -240,6 +238,12 @@ Chameleon
 Mako
 ~~~~
 ::
+
+    @view_config(renderer='foo.mak')
+    def my_view(request):
+        return {'project':'my project'}
+
+Direct use::
 
     from mako.template import Template
     from pyramid.response import Response
@@ -252,6 +256,17 @@ Mako
 
 Jinja2
 ~~~~~~
+::
+
+    @view_config(renderer='mytemplate.jinja2')
+    def myview(request):
+        return {'foo':1, 'bar':2}
+
+Direct use::
+
+    from pyramid.renderers import render_to_response
+    render_to_response('mytemplate.jinja2', {'foo':1, 'bar':2})
+
 Install the `pyramid_jinja2`__ package::
 
     ../bin/easy_install pyramid_jinja2  
@@ -260,15 +275,6 @@ Activate it::
 
     config.include('pyramid_jinja2')
     config.add_jinja2_search_path("yourapp:templates")
-
-Use::
-
-    @view_config(renderer='mytemplate.jinja2')
-    def myview(request):
-        return {'foo':1, 'bar':2}
-
-    from pyramid.renderers import render_to_response
-    render_to_response('mytemplate.jinja2', {'foo':1, 'bar':2})
 
 __ `http://docs.pylonsproject.org/projects/pyramid_jinja2/en/latest/`
 
@@ -375,11 +381,11 @@ This is a form-handling view with three steps:
 
 1. Display login
 
-2. Get login values after submit
+2. Get login values after submit, authenticate:
 
-   2.1 If authentication is successful return to the referrer,
+   2.1 If successful return to the referrer
 
-   2.2 If authentication failed display login with 'login failed' text
+   2.2 If failed display login with 'login failed' text
 
 ::
 
