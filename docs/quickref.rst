@@ -35,7 +35,7 @@ Run the tests::
 
 Show coverage information::
 
-  ../bin/nosetests --cover-package=<nane> --cover-erase --with-coverage
+  ../bin/nosetests --cover-package=<name> --cover-erase --with-coverage
 
 Initialize the database (Alchemy only)::
 
@@ -217,66 +217,100 @@ Handle a form
 Templates
 ---------
 
-Chameleon
-~~~~~~~~~
-::
++--------------------+-------------------------------------------------------------------------+---------------+
+|       Choice       |         How to use                                                      |   Tips        |
++====================+=========================================================================+===============+
+|                    |\                                                                        |               |
+|                    |                                                                         |               |
+|:term:`Chameleon`   |::                                                                       |               |
+|                    |                                                                         |               |
+|                    |   @view_config(renderer='templates/mytemplate.pt')                      |               |
+|                    |   def my_view(request):                                                 |               |
+|                    |       return {'bar':1, 'project':'myproject'}                           |               |
+|                    |                                                                         |               |
+|                    |                                                                         |               |
+|                    |\                                                                        |               |
++--------------------+-------------------------------------------------------------------------+---------------+
+|                    |\                                                                        |               |
+|                    |                                                                         |               |
+|:term:`Mako`        |::                                                                       |               |
+|                    |                                                                         |               |
+|                    |   @view_config(renderer='foo.mak')                                      |               |
+|                    |   def my_view(request):                                                 |               |
+|                    |       return {'project':'my project'}                                   |               |
+|                    |                                                                         |               |
+|                    |                                                                         |               |
+|                    |\                                                                        |               |
++--------------------+-------------------------------------------------------------------------+---------------+
+|                    |\                                                                        |               |
+|                    |                                                                         |               |
+|:term:`Jinja2`      |::                                                                       |               |
+|                    |                                                                         |               |
+|                    |   @view_config(renderer='mytemplate.jinja2')                            |               |
+|                    |   def myview(request):                                                  |               |
+|                    |       return {'foo':1, 'bar':2}                                         |               |
+|                    |                                                                         |               |
+|                    |Install the `pyramid_jinja2`__ package::                                 |               |
+|                    |                                                                         |               |
+|                    |    ../bin/easy_install pyramid_jinja2                                   |               |
+|                    |                                                                         |               |
+|                    |Activate it::                                                            |               |
+|                    |                                                                         |               |
+|                    |    config.include('pyramid_jinja2')                                     |               |
+|                    |    config.add_jinja2_search_path("yourapp:templates")                   |               |
+|                    |                                                                         |               |
+|                    |__ `http://docs.pylonsproject.org/projects/pyramid_jinja2/en/latest/`    |               |
+|                    |                                                                         |               |
+|                    |\                                                                        |               |
++--------------------+-------------------------------------------------------------------------+---------------+
 
-    @view_config(renderer='templates/mytemplate.pt')
-    def my_view(request):
-        #
-        return {'one':one, 'project':'myproject'}
 
-Direct use::
+Direct use
+~~~~~~~~~~
 
-    from pyramid.renderers import render_to_response
-
-    def sample_view(request):
-        return render_to_response('templates/foo.pt',
-                                  {'foo':1, 'bar':2},
-                                  request=request)
-
-Mako
-~~~~
-::
-
-    @view_config(renderer='foo.mak')
-    def my_view(request):
-        return {'project':'my project'}
-
-Direct use::
-
-    from mako.template import Template
-    from pyramid.response import Response
-
-    def make_view(request):
-        template = Template(filename='/templates/template.mak')
-        result = template.render(name=request.params['name'])
-        response = Response(result)
-        return response
-
-Jinja2
-~~~~~~
-::
-
-    @view_config(renderer='mytemplate.jinja2')
-    def myview(request):
-        return {'foo':1, 'bar':2}
-
-Direct use::
-
-    from pyramid.renderers import render_to_response
-    render_to_response('mytemplate.jinja2', {'foo':1, 'bar':2})
-
-Install the `pyramid_jinja2`__ package::
-
-    ../bin/easy_install pyramid_jinja2  
-
-Activate it::
-
-    config.include('pyramid_jinja2')
-    config.add_jinja2_search_path("yourapp:templates")
-
-__ `http://docs.pylonsproject.org/projects/pyramid_jinja2/en/latest/`
++--------------+------------------------------------------------------------------+
+| Choice       |         How to use                                               |
++==============+==================================================================+
+|              |\                                                                 |
+|              |                                                                  |
+| Chameleon    |::                                                                |
+|              |                                                                  |
+|              |   from pyramid.renderers import render_to_response               |
+|              |                                                                  |
+|              |   def sample_view(request):                                      |
+|              |       return render_to_response('templates/foo.pt',              |
+|              |                                 {'foo':1, 'bar':2})              |
+|              |                                                                  |
+|              |                                                                  |
+|              |\                                                                 |
++--------------+------------------------------------------------------------------+
+|              |\                                                                 |
+|              |                                                                  |
+| Mako         |::                                                                |
+|              |                                                                  |
+|              |   from mako.template import Template                             |
+|              |   from pyramid.response import Response                          |
+|              |                                                                  |
+|              |   def make_view(request):                                        |
+|              |       template = Template(filename='/templates/template.mak')    |
+|              |       result = template.render(name=request.params['name'])      |
+|              |       response = Response(result)                                |
+|              |       return response                                            |
+|              |                                                                  |
+|              |\                                                                 |
++--------------+------------------------------------------------------------------+
+|              |\                                                                 |
+|              |                                                                  |
+| Jinja2       |::                                                                |
+|              |                                                                  |
+|              |   from pyramid.renderers import render_to_response               |
+|              |   def sample_view(request):                                      |
+|              |       return render_to_response('mytemplate.jinja2',             |
+|              |                                 {'foo':1, 'bar':2})              |
+|              |                                                                  |
+|              |                                                                  |
+|              |\                                                                 |
++--------------+------------------------------------------------------------------+
 
 
 Form generation
