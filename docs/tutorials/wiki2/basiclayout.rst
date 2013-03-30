@@ -10,124 +10,74 @@ they provide a good orientation for the high-level patterns common to most
 Application Configuration with ``__init__.py``
 ----------------------------------------------
 
-A directory on disk can be turned into a Python :term:`package` by containing
-an ``__init__.py`` file.  Even if empty, this marks a directory as a Python
-package.  We use ``__init__.py`` both as a marker indicating the directory
-it's contained within is a package, and to contain configuration code.
-
-Open ``tutorial/tutorial/__init__.py``.  It should already contain
-the following:
-
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :linenos:
-      :language: py
-
-Let's go over this piece-by-piece.  First, we need some imports to support
-later code:
-
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :end-before: main
-      :linenos:
-      :language: py
-
-``__init__.py`` defines a function named ``main``.  Here is the entirety of
-the ``main`` function we've defined in our ``__init__.py``:
-
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :pyobject: main
-      :linenos:
-      :language: py
-
+File ``tutorial/tutorial/__init__.py`` is used as marker to indicate that its
+parent directory is a Python package, and it also defines a ``main()`` function
+that creates the :app:`Pyramid` application that will be run.
 When you invoke the ``pserve development.ini`` command, the ``main`` function
-above is executed.  It accepts some settings and returns a :term:`WSGI`
+is executed, passing it some settings, and returns a :term:`WSGI`
 application.  (See :ref:`startup_chapter` for more about ``pserve``.)
 
-The main function first creates a :term:`SQLAlchemy` database engine using
-:func:`sqlalchemy.engine_from_config` from the ``sqlalchemy.`` prefixed
-settings in the ``development.ini`` file's ``[app:main]`` section.
-This will be a URI (something like ``sqlite://``):
+The content of ``tutorial/tutorial/__init__.py`` is shown below. It starts
+by importing some objects needed by the ``main`` function:
+
+ - :meth:`pyramid.config.Configurator` to configure
+   the :app:`Pyramid` application.
+
+ - :func:`sqlalchemy.engine_from_config` to create a database engine.
+
+ - :func:`DBSession` and :func:`Base` are used to configure and bind the database of
+   the application.
 
    .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 13
+      :linenos:
       :language: py
 
-``main`` then initializes our SQLAlchemy session object, passing it the
-engine:
 
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 14
-      :language: py
+The ``main`` function does the following:
 
-``main`` subsequently initializes our SQLAlchemy declarative ``Base`` object,
-assigning the engine we created to the ``bind`` attribute of it's
-``metadata`` object.  This allows table definitions done imperatively
-(instead of declaratively, via a class statement) to work.  We won't use any
-such tables in our application, but if you add one later, long after you've
-forgotten about this tutorial, you won't be left scratching your head when it
-doesn't work.
+ - :func:`sqlalchemy.engine_from_config` creates a :term:`SQLAlchemy`
+   database engine, using from the ``sqlalchemy.`` prefixed
+   settings in the ``development.ini`` file's ``[app:main]`` section.
+   This will be a URI (something like ``sqlite://``):
 
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 15
-      :language: py
+ - :meth:`DBSession.configure` initializes our SQLAlchemy session object,
+   passing it the engine.
 
-The next step of ``main`` is to construct a :term:`Configurator` object:
+ - :data:`Base.metadata.bind` is assigned the engine we created, initializing
+   our SQLAlchemy declarative ``Base`` object.
+   This allows table definitions done imperatively
+   (instead of declaratively, via a class statement) to work.  We won't use any
+   such tables in our application, but if you add one later, long after you've
+   forgotten about this tutorial, you won't be left scratching your head when
+   it doesn't work.
 
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 16
-      :language: py
+ - :meth:`pyramid.config.Configurator` is instantiated to construct a
+   :term:`Configurator` object.
+   The ``settings`` keyword argument gets the dictionary values passed to
+   `main()` as the ``**settings`` argument.  This will be a
+   dictionary of settings parsed from the ``.ini`` file, which contains
+   deployment-related values such as ``pyramid.reload_templates``,
+   ``db_string``, etc.
 
-``settings`` is passed to the Configurator as a keyword argument with the
-dictionary values passed as the ``**settings`` argument.  This will be a
-dictionary of settings parsed from the ``.ini`` file, which contains
-deployment-related values such as ``pyramid.reload_templates``,
-``db_string``, etc.
+ - :meth:`pyramid.config.Configurator.add_static_view` registers a static
+   resource view that will match any URL that starts
+   with the prefix ``/static`` (by virtue of the first argument) and
+   will serve up static resources for us from within
+   the ``static`` directory of our ``tutorial`` package and below
+   (by virtue of the second argument).
 
-``main`` now calls :meth:`pyramid.config.Configurator.add_static_view` with
-two arguments: ``static`` (the name), and ``static`` (the path):
+ - :meth:`pyramid.config.Configurator.add_route` registers a
+   :term:`route configuration` for a route named `home` that will be used
+   when the URL is ``/``.
 
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 17
-      :language: py
+ - :meth:`pyramid.config.Configurator.scan` recursively scans the modules
+   in our ``tutorial`` package, looking for ``@view_config`` (and
+   other special) decorators, registering a view configuration for each
+   ``@view_config`` decorator found.  This maps
+   application URLs to some code.
 
-This registers a static resource view which will match any URL that starts
-with the prefix ``/static`` (by virtue of the first argument to
-``add_static_view``).  This will serve up static resources for us from within
-the ``static`` directory of our ``tutorial`` package, in this case, via
-``http://localhost:6543/static/`` and below (by virtue of the second argument
-to ``add_static_view``).  With this declaration, we're saying that any URL that
-starts with ``/static`` should go to the static view; any remainder of its
-path (e.g. the ``/foo`` in ``/static/foo``) will be used to compose a path to
-a static file resource, such as a CSS file.
-
-Using the configurator ``main`` also registers a :term:`route configuration`
-via the :meth:`pyramid.config.Configurator.add_route` method that will be
-used when the URL is ``/``:
-
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 18
-      :language: py
-
-Since this route has a ``pattern`` equalling ``/`` it is the route that will
-be matched when the URL ``/`` is visited, e.g. ``http://localhost:6543/``.
-
-``main`` next calls the ``scan`` method of the configurator
-(:meth:`pyramid.config.Configurator.scan`), which will recursively scan our
-``tutorial`` package, looking for ``@view_config`` (and
-other special) decorators.  When it finds a ``@view_config`` decorator, a
-view configuration will be registered, which will allow one of our
-application URLs to be mapped to some code.
-
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 19
-      :language: py
-
-Finally, ``main`` is finished configuring things, so it uses the
-:meth:`pyramid.config.Configurator.make_wsgi_app` method to return a
-:term:`WSGI` application:
-
-   .. literalinclude:: src/basiclayout/tutorial/__init__.py
-      :lines: 20
-      :language: py
+ - :meth:`pyramid.config.Configurator.make_wsgi_app` returns a
+   :term:`WSGI` application from the :term:`Configurator`.
 
 View Declarations via ``views.py``
 ----------------------------------
